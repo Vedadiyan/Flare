@@ -73,7 +73,9 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         return this._styles;
     }
     set innerText(value: string) {
-
+        if(this._htmlElement) {
+            this._htmlElement.innerText = value;
+        }
     }
     get innerText(): string {
         return "";
