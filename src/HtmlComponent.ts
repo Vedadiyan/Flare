@@ -1,16 +1,34 @@
 import { v4 } from 'uuid';
 
 /// <reference path="./core/abstraction/IHtmlComponent.ts" />
-/// <reference path="./core/storage/VirtualDOM.ts" />
 /// <reference path="./core/types/KeyValue.ts" />
 
-export type Children = string | Flare.Core.Abstraction.IHtmlComponent;
 
+export class VirtualDOM {
+    public static current: VirtualDOM;
+    public static create(): void {
+        if (this.current === undefined) {
+            this.current = new VirtualDOM();
+        }
+    }
+    private constructor() {
+
+    }
+    registerHtmlComponent(virtualId: string, selector: string, htmlCoponent: Flare.Core.Abstraction.IHtmlComponent) {
+
+    }
+    unRegisterHtmlComponent(virtualId: string) {
+
+    }
+}
+
+export type Children = string | Flare.Core.Abstraction.IHtmlComponent;
 export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
 
     //#region HtmlElement
     private _htmlElement: HTMLElement;
     private _targetHtmlElement: HTMLElement;
+    private _targetHtmlElementCloned: HTMLElement;
     private _virtualId: string;
     private _attributes: Flare.Core.Types.KeyValue<string>;
     private _observers: Flare.Core.Types.KeyValue<[Flare.Core.Abstraction.IObserver, any]>;
@@ -28,7 +46,13 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         this._styles = styles;
         this._children = childern;
         this._virtualId = v4();
-        this._targetHtmlElement = document.querySelector(selector);
+        this._attributes = {};
+        this._observers = {};
+        if (selector) {
+            this._targetHtmlElement = document.querySelector(selector);
+            this._targetHtmlElementCloned = this._targetHtmlElement.cloneNode(false) as HTMLElement;
+        }
+        VirtualDOM.create();
     }
     set tagName(value: string) {
         this._tagName = value;
@@ -49,36 +73,46 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         return this._styles;
     }
     set innerText(value: string) {
-        throw new Error("Method not implemented.");
+
     }
     get innerText(): string {
-        throw new Error("Method not implemented.");
+        return "";
     }
     create(): void {
         this._htmlElement = document.createElement(this._tagName);
-        for (let className of this._classList) {
-            this._htmlElement.classList.add(className);
-        }
-        for (let style in this._styles) {
-            this._htmlElement.style.setProperty(style, this.styles[style]);
-        }
-        for (let attribute in this._attributes) {
-            this._htmlElement.setAttribute(attribute, this._attributes[attribute]);
-        }
-        for (let child of this._children) {
-            if (child instanceof HtmlComponent) {
-                child.create();
-                this._htmlElement.appendChild((child as HtmlComponent)._htmlElement);
-            }
-            else {
-                this._htmlElement.innerText += child;
+        if (this._classList) {
+            for (let className of this._classList) {
+                this._htmlElement.classList.add(className);
             }
         }
-        for (let observer in this._observers) {
-            this._htmlElement.addEventListener(observer, this._observers[observer][1]);
+        if (this._styles) {
+            for (let style in this._styles) {
+                this._htmlElement.style.setProperty(style, this.styles[style]);
+            }
         }
-        this._htmlElement.innerText += this.innerText;
-        Flare.Core.Storage.VirtualDOM.current.registerHtmlComponent(this._virtualId, this._selector, this);
+        if (this._attributes) {
+            for (let attribute in this._attributes) {
+                this._htmlElement.setAttribute(attribute, this._attributes[attribute]);
+            }
+        }
+        if (this._children) {
+            for (let child of this._children) {
+                if (child instanceof HtmlComponent) {
+                    child.create();
+                    this._htmlElement.appendChild((child as HtmlComponent)._htmlElement);
+                }
+                else {
+                    this._htmlElement.innerText += child;
+                }
+            }
+        }
+        if (this._observers) {
+            for (let observer in this._observers) {
+                this._htmlElement.addEventListener(observer, this._observers[observer][1]);
+            }
+        }
+        //this._htmlElement.innerText += this.innerText;
+        VirtualDOM.current.registerHtmlComponent(this._virtualId, this._selector, this);
     }
     mount(): void {
         if (this._targetHtmlElement) {
@@ -91,23 +125,26 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         }
     }
     unMount(): void {
-        if (this._targetHtmlElement) {
+        if (this._htmlElement) {
             for (let child of this._children) {
                 if (child instanceof HtmlComponent) {
-                    child.mount();
+                    child.unMount();
                 }
             }
-            this._targetHtmlElement.innerHTML = null;
+            if (this._targetHtmlElement) {
+                this._targetHtmlElement = this._targetHtmlElementCloned.cloneNode(false) as HTMLElement;
+                this._htmlElement.replaceWith(this._targetHtmlElement);
+            }
         }
     }
     destroy(): void {
-        if (this._targetHtmlElement) {
+        if (this._htmlElement) {
             for (let child of this._children) {
                 if (child instanceof HtmlComponent) {
                     child.destroy();
                 }
             }
-            this._targetHtmlElement.remove();
+            this._htmlElement.remove();
         }
     }
     setAttribute(name: string, value: string): void {

@@ -3,7 +3,7 @@
 namespace Flare.Core.Storage {
     export class VirtualDOM {
         public static current: VirtualDOM;
-        public static Create(): void {
+        public static create(): void {
             if (this.current === null) {
                 this.current = new VirtualDOM();
             }
