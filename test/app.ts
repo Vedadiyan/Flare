@@ -26,6 +26,5 @@ import { Test } from "./test";
 //     htmlComponent.innerText = "Changed";
 // }, 2000);
 
-let i = Test("#test") as unknown as HtmlComponent;
-i.create();
-i.mount();
+new Test("#test").render().create().mount();
+

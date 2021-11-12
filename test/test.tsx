@@ -1,14 +1,20 @@
 /** @jsx createElement */
 
 import { createElement } from "../src/CreateElement";
-import { HtmlComponent } from "../src/HtmlComponent";
+import { FlareComponent } from "../src/FlareComponent";
 
-export function Test(id: string) {
-    return (
-        <div data-target={id} style= {{backgroundColor: 'blue'}}>
-            <h1>
-                OK
-            </h1>
-        </div>
-    );
+export class Test extends FlareComponent {
+    constructor(selector: string) {
+        super(selector);
+    }
+    template() {
+        return (
+            <div data-target={this.selector} style={{ backgroundColor: 'blue' }}>
+                <h1>
+                    OK
+                </h1>
+            </div>
+        );
+    }
+
 }
