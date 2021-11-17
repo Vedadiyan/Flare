@@ -1,4 +1,7 @@
 import { v4 } from 'uuid';
+import { IAttributeContext } from './core/abstraction/IAttributeContext';
+import { GlobalAttributes } from './core/constants/GlobalAttributes';
+import { GlobalEvents } from './core/constants/GlobalEvents';
 
 /// <reference path="./core/abstraction/IHtmlComponent.ts" />
 /// <reference path="./core/types/KeyValue.ts" />
@@ -39,17 +42,27 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
     private _classList: string[];
     private _styles: Flare.Core.Types.KeyValue<string>;
     private _children: Children[];
-    constructor(selector: string, tagName: string, classList: string[] | null, styles: Flare.Core.Types.KeyValue<string> | null, childern: Children[] | null) {
-        this._selector = selector;
+    constructor(tagName: string, attributes: IAttributeContext, childern: Children[] | null) {
         this._tagName = tagName;
-        this._classList = classList;
-        this._styles = styles;
+        this._selector = attributes.getDataSet("data-target");
+        this._classList = attributes.getGlobalAttribute<string>("ClassName")?.split(' ');
+        this._styles = attributes.getGlobalAttribute("Style");
         this._children = childern;
         this._virtualId = v4();
         this._attributes = {};
+        for (let attribute of attributes.globalAttributes.filter(x => GlobalAttributes[x] !== GlobalAttributes.ClassName && GlobalAttributes[x] !== GlobalAttributes.Class && GlobalAttributes[x] !== GlobalAttributes.Style)) {
+            this._attributes[attribute] = attributes.getGlobalAttribute(attribute);
+        }
+        for (let dataAttribute of attributes.dataSet.filter(x => x !== "data-target")) {
+            this._attributes[dataAttribute] = attributes.getDataSet(dataAttribute);
+        }
         this._observers = {};
-        if (selector) {
-            this._targetHtmlElement = document.querySelector(selector);
+        for (let event of attributes.globalEvents) {
+            let observer = attributes.getGlobalEvent(event);
+            this._observers[observer.key] = [observer, observer.next];
+        }
+        if (this._selector) {
+            this._targetHtmlElement = document.querySelector(this._selector);
             this._targetHtmlElementCloned = this._targetHtmlElement.cloneNode(false) as HTMLElement;
         }
         VirtualDOM.create();
@@ -73,7 +86,7 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         return this._styles;
     }
     set innerText(value: string) {
-        if(this._htmlElement) {
+        if (this._htmlElement) {
             this._htmlElement.innerText = value;
         }
     }
@@ -89,7 +102,7 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         }
         if (this._styles) {
             for (let style in this._styles) {
-                this._htmlElement.style.setProperty(style, this.styles[style]);
+                this._htmlElement.style.setProperty(this._getStylePropertyName(style), this._styles[style]);
             }
         }
         if (this._attributes) {
@@ -157,16 +170,16 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
     }
     subscribe(observer: Flare.Core.Abstraction.IObserver): void {
         let event = (e: any) => observer.next(e);
-        this._observers[observer.Key] = [observer, event];
+        this._observers[observer.key] = [observer, event];
         if (this._htmlElement) {
-            this._htmlElement.addEventListener(observer.Key, event);
+            this._htmlElement.addEventListener(observer.key, event);
         }
     }
     unSubscribe(observer: Flare.Core.Abstraction.IObserver): void {
         if (this._htmlElement) {
-            this._htmlElement.removeEventListener(observer.Key, this._observers[observer.Key][1]);
+            this._htmlElement.removeEventListener(observer.key, this._observers[observer.key][1]);
         }
-        delete this._observers[observer.Key];
+        delete this._observers[observer.key];
     }
     appendChild(child: Flare.Core.Abstraction.IHtmlComponent) {
         this._children.push(child);
@@ -174,5 +187,17 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
     removeChild(child: Flare.Core.Abstraction.IHtmlComponent) {
         let index: number = this._children.indexOf(child);
         this._children = this._children.splice(index, 1);
+    }
+    private _getStylePropertyName(input: string): string {
+        let output = '';
+        for (let i of input) {
+            if (i == i.toUpperCase()) {
+                output += '-' + i.toLowerCase();
+            }
+            else {
+                output += i;
+            }
+        }
+        return output;
     }
 }

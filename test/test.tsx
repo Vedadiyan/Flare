@@ -1,5 +1,6 @@
 /** @jsx createElement */
 
+import { MouseEventHandler } from "react";
 import { createElement } from "../src/CreateElement";
 import { FlareComponent } from "../src/FlareComponent";
 
@@ -9,8 +10,8 @@ export class Test extends FlareComponent {
     }
     template() {
         return (
-            <div data-target={this.selector} style={{ backgroundColor: 'blue' }}>
-                <h1>
+            <div data-target={this.selector} style={{ backgroundColor: 'blue' }} className="test">
+                <h1 onClick={()=> {console.log('ok')}}>
                     OK
                 </h1>
             </div>
