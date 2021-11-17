@@ -11,7 +11,7 @@ export class Test extends FlareComponent {
     template() {
         return (
             <div data-target={this.selector} style={{ backgroundColor: 'blue' }} className="test">
-                <h1 onClick={()=> {console.log('ok')}}>
+                <h1>
                     OK
                 </h1>
             </div>

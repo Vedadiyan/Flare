@@ -21,7 +21,7 @@ export class AttributeContext implements IAttributeContext {
         return this._dataSetProcessed ?? (this._dataSetProcessed = Object.keys(this._dataSet));
     }
     constructor(attributes: Flare.Core.Types.KeyValue<any>) {
-        this._attributes = attributes;
+        this._attributes = attributes ?? {};
         for (let attribute in attributes) {
             let lowerCaseAttribute = attribute.toLowerCase();
             let result: string
