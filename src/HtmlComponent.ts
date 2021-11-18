@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 import { IAttributeContext } from './core/abstraction/IAttributeContext';
 import { GlobalAttributes } from './core/constants/GlobalAttributes';
 import { GlobalEvents } from './core/constants/GlobalEvents';
+import { FlareComponent } from './FlareComponent';
 
 /// <reference path="./core/abstraction/IHtmlComponent.ts" />
 /// <reference path="./core/types/KeyValue.ts" />
@@ -42,6 +43,15 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
     private _classList: string[];
     private _styles: Flare.Core.Types.KeyValue<string>;
     private _children: Children[];
+    private _instance: FlareComponent;
+    set instance(instance: FlareComponent) {
+        this._instance = instance;
+        for (let child of this._children) {
+            if (child instanceof HtmlComponent) {
+                child.instance = instance;
+            }
+        }
+    }
     constructor(tagName: string, attributeContext: IAttributeContext, childern: Children[] | null) {
         this._tagName = tagName;
         this._attributeContext = attributeContext;
@@ -129,9 +139,9 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
                 });
             }
         }
-        let refFn: (e: any) => void = this._attributeContext.getFlareAttribute("Ref");
-        if (refFn) {
-            refFn(this._htmlElement);
+        let model = this._attributeContext.getFlareAttribute("Model") as string;
+        if (model) {
+            this._instance.register(model, this._htmlElement);
         }
         //this._htmlElement.innerText += this.innerText;
         VirtualDOM.current.registerHtmlComponent(this._virtualId, this._selector, this);

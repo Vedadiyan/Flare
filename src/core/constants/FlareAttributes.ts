@@ -1,3 +1,3 @@
 export enum FlareAttributes {
-    Ref = "ref"
+    Model = "model"
 }
