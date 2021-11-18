@@ -1,4 +1,5 @@
 import { IAttributeContext } from "./abstraction/IAttributeContext";
+import { FlareAttributes } from "./constants/FlareAttributes";
 import { GlobalAttributes } from "./constants/GlobalAttributes";
 import { GlobalEvents } from "./constants/GlobalEvents";
 import { DefaultObserver } from "./DefaultObserver";
@@ -8,9 +9,11 @@ export class AttributeContext implements IAttributeContext {
     private _globalEvents: any = {};
     private _globalAttributes: any = {};
     private _dataSet: any = {};
+    private _flareAttributes: any = {};
     private _globalEventsProcessed: (keyof typeof GlobalEvents)[];
     private _globalAttributesProcessed: (keyof typeof GlobalAttributes)[];
     private _dataSetProcessed: string[];
+    private _flareAttributesProcessed: (keyof typeof FlareAttributes)[];
     get globalEvents(): (keyof typeof GlobalEvents)[] {
         return this._globalEventsProcessed ?? (this._globalEventsProcessed = Object.keys(this._globalEvents).map(x => x as keyof typeof GlobalEvents));
     }
@@ -19,6 +22,9 @@ export class AttributeContext implements IAttributeContext {
     }
     get dataSet(): string[] {
         return this._dataSetProcessed ?? (this._dataSetProcessed = Object.keys(this._dataSet));
+    }
+    get flareAttributes(): (keyof typeof FlareAttributes)[] {
+        return this._flareAttributesProcessed ?? (this._flareAttributesProcessed = Object.keys(this._flareAttributes).map(x => x as keyof typeof FlareAttributes));
     }
     constructor(attributes: Flare.Core.Types.KeyValue<any>) {
         this._attributes = attributes ?? {};
@@ -34,6 +40,9 @@ export class AttributeContext implements IAttributeContext {
             else if (lowerCaseAttribute.startsWith("data-")) {
                 this._dataSet[lowerCaseAttribute] = attribute;
             }
+            else if (lowerCaseAttribute.startsWith("f-") && (result = this._valueOf(FlareAttributes, lowerCaseAttribute.replace("f-", "")))) {
+                this._flareAttributes[result] = attribute;
+            }
         }
     }
     getGlobalEvent(globalEvent: keyof typeof GlobalEvents): Flare.Core.Abstraction.IObserver {
@@ -45,6 +54,9 @@ export class AttributeContext implements IAttributeContext {
     }
     getDataSet(dataAttribute: string) {
         return this._attributes[this._dataSet[dataAttribute]];
+    }
+    getFlareAttribute<TResult>(flareAttribute: keyof typeof FlareAttributes): TResult {
+        return this._attributes[this._flareAttributes[flareAttribute]];
     }
     private _valueOf<TEnumType>(e: TEnumType, value: string): string {
         for (let key in e) {

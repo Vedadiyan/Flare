@@ -36,29 +36,30 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
     private _attributes: Flare.Core.Types.KeyValue<string>;
     private _observers: Flare.Core.Types.KeyValue<[Flare.Core.Abstraction.IObserver, any]>;
     //#endregion
-
+    private _attributeContext: IAttributeContext;
     private _selector: string;
     private _tagName: string;
     private _classList: string[];
     private _styles: Flare.Core.Types.KeyValue<string>;
     private _children: Children[];
-    constructor(tagName: string, attributes: IAttributeContext, childern: Children[] | null) {
+    constructor(tagName: string, attributeContext: IAttributeContext, childern: Children[] | null) {
         this._tagName = tagName;
-        this._selector = attributes.getDataSet("data-target");
-        this._classList = attributes.getGlobalAttribute<string>("ClassName")?.split(' ');
-        this._styles = attributes.getGlobalAttribute("Style");
+        this._attributeContext = attributeContext;
+        this._selector = attributeContext.getDataSet("data-target");
+        this._classList = attributeContext.getGlobalAttribute<string>("ClassName")?.split(' ');
+        this._styles = attributeContext.getGlobalAttribute("Style");
         this._children = childern;
         this._virtualId = v4();
         this._attributes = {};
-        for (let attribute of attributes.globalAttributes.filter(x => GlobalAttributes[x] !== GlobalAttributes.ClassName && GlobalAttributes[x] !== GlobalAttributes.Class && GlobalAttributes[x] !== GlobalAttributes.Style)) {
-            this._attributes[attribute] = attributes.getGlobalAttribute(attribute);
+        for (let attribute of attributeContext.globalAttributes.filter(x => GlobalAttributes[x] !== GlobalAttributes.ClassName && GlobalAttributes[x] !== GlobalAttributes.Class && GlobalAttributes[x] !== GlobalAttributes.Style)) {
+            this._attributes[attribute] = attributeContext.getGlobalAttribute(attribute);
         }
-        for (let dataAttribute of attributes.dataSet.filter(x => x !== "data-target")) {
-            this._attributes[dataAttribute] = attributes.getDataSet(dataAttribute);
+        for (let dataAttribute of attributeContext.dataSet.filter(x => x !== "data-target")) {
+            this._attributes[dataAttribute] = attributeContext.getDataSet(dataAttribute);
         }
         this._observers = {};
-        for (let event of attributes.globalEvents) {
-            let observer = attributes.getGlobalEvent(event);
+        for (let event of attributeContext.globalEvents) {
+            let observer = attributeContext.getGlobalEvent(event);
             this._observers[observer.key] = [observer, observer.next];
         }
         if (this._selector) {
@@ -123,8 +124,14 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         }
         if (this._observers) {
             for (let observer in this._observers) {
-                this._htmlElement.addEventListener(observer, this._observers[observer][1]);
+                this._htmlElement.addEventListener(observer, (e) => {
+                    this._observers[observer][1](this._htmlElement);
+                });
             }
+        }
+        let refFn: (e: any) => void = this._attributeContext.getFlareAttribute("Ref");
+        if (refFn) {
+            refFn(this._htmlElement);
         }
         //this._htmlElement.innerText += this.innerText;
         VirtualDOM.current.registerHtmlComponent(this._virtualId, this._selector, this);

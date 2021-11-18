@@ -20,6 +20,7 @@ export enum GlobalAttributes {
     ItemScope = "itemscope",
     ItemType = "itemtype",
     Lang = "lang",
+    Name = "name",
     Nonce= "nonce",
     Part = "part",
     Slot = "slot",
@@ -27,5 +28,6 @@ export enum GlobalAttributes {
     Style = "style",
     TabIndex = "tabindex",
     Title = "title",
-    Translate = "translate"
+    Translate = "translate",
+    Value = "value"
 }
