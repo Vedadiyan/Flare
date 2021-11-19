@@ -28,5 +28,5 @@ import { Test } from "./test";
 //     htmlComponent.innerText = "Changed";
 // }, 2000);
 Components.current.register("HelloWorld", HelloWorld);
-new Test("#test").render().create().mount().unMount().mount();
+let test = new Test("#test").render().create().mount().destroy();
 

@@ -12,9 +12,10 @@ export class Test extends FlareComponent {
     }
     template() {
         return (
-            <div data-target={this.selector} style={{ backgroundColor: 'blue' }} className="test">
+            <div data-target={this.selector}  className="test">
                 <input type="text" f-model="test" onKeyUp={() => { this.data["displayTest"].reference.innerText = (this.data["test"].reference as HTMLInputElement).value }} />
                 <p f-model="displayTest"></p>
+                <div f-component="HelloWorld"></div>
                 <div f-component="HelloWorld"></div>
             </div>
         );

@@ -182,6 +182,19 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
                 }
             }
             this._htmlElement.remove();
+            delete this._htmlElement;
+            delete this._targetHtmlElement;
+            delete this._targetHtmlElementCloned;
+            delete this._virtualId;
+            delete this._attributes;
+            delete this._observers;
+            delete this._attributeContext;
+            delete this._selector;
+            delete this._tagName;
+            delete this._classList;
+            delete this._styles;
+            delete this._children;
+            delete this._instance;
         }
     }
     setAttribute(name: string, value: string): void {
