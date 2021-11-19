@@ -54,9 +54,11 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         }
     }
     constructor(tagName: string, attributeContext: IAttributeContext, childern: Children[] | null) {
-        let component: string = attributeContext.getFlareAttribute("Component");
-        if (component) {
-            return Components.current.new(component).render()._htmlComponent;
+        if (tagName === "slot") {
+            let component: string = attributeContext.getFlareAttribute("Component");
+            if (component) {
+                return Components.current.new(component).render()._htmlComponent;
+            }
         }
         this._tagName = tagName;
         this._attributeContext = attributeContext;

@@ -15,8 +15,8 @@ export class Test extends FlareComponent {
             <div data-target={this.selector}  className="test">
                 <input type="text" f-model="test" onKeyUp={() => { this.data["displayTest"].reference.innerText = (this.data["test"].reference as HTMLInputElement).value }} />
                 <p f-model="displayTest"></p>
-                <div f-component="HelloWorld"></div>
-                <div f-component="HelloWorld"></div>
+                <slot f-component="HelloWorld" />
+                <slot f-component="HelloWorld" />
             </div>
         );
     }
