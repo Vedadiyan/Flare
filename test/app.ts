@@ -1,4 +1,6 @@
+import Components from "../src/core/storage/Components";
 import { HtmlComponent  } from "../src/HtmlComponent";
+import HelloWorld from "./HelloWorld";
 import { Test } from "./test";
 /// <reference path="./core/abstraction/IObserver.ts" />
 // let htmlComponent = new HtmlComponent('#test', 'div', null, null, [new HtmlComponent(null, 'h1', null, null, ['content']), new HtmlComponent(null, 'h1', null, null, ['content2'])]);
@@ -25,6 +27,6 @@ import { Test } from "./test";
 // setTimeout(() => {
 //     htmlComponent.innerText = "Changed";
 // }, 2000);
-
-new Test("#test").render().create().mount();
+Components.current.register("HelloWorld", HelloWorld);
+new Test("#test").render().create().mount().unMount().mount();
 

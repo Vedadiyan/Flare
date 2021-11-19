@@ -6,7 +6,7 @@ export abstract class FlareComponent {
     private _data: {
         [name: string]: Data
     };
-    protected _htmlComponent: HtmlComponent;
+    _htmlComponent: HtmlComponent;
     get selector() {
         return this._selector;
     }

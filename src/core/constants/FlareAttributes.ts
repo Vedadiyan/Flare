@@ -1,3 +1,4 @@
 export enum FlareAttributes {
-    Model = "model"
+    Model = "model",
+    Component = "component"
 }

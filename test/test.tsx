@@ -4,6 +4,7 @@ import { MouseEvent } from "react";
 import { createElement } from "../src/CreateElement";
 import { FlareComponent } from "../src/FlareComponent";
 import { HtmlComponent } from "../src/HtmlComponent";
+import HelloWorld from "./HelloWorld";
 
 export class Test extends FlareComponent {
     constructor(selector: string) {
@@ -14,6 +15,7 @@ export class Test extends FlareComponent {
             <div data-target={this.selector} style={{ backgroundColor: 'blue' }} className="test">
                 <input type="text" f-model="test" onKeyUp={() => { this.data["displayTest"].reference.innerText = (this.data["test"].reference as HTMLInputElement).value }} />
                 <p f-model="displayTest"></p>
+                <div f-component="HelloWorld"></div>
             </div>
         );
     }

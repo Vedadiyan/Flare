@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 import { IAttributeContext } from './core/abstraction/IAttributeContext';
 import { GlobalAttributes } from './core/constants/GlobalAttributes';
 import { GlobalEvents } from './core/constants/GlobalEvents';
+import Components from './core/storage/Components';
 import { FlareComponent } from './FlareComponent';
 
 /// <reference path="./core/abstraction/IHtmlComponent.ts" />
@@ -53,6 +54,10 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
         }
     }
     constructor(tagName: string, attributeContext: IAttributeContext, childern: Children[] | null) {
+        let component: string = attributeContext.getFlareAttribute("Component");
+        if (component) {
+            return Components.current.new(component).render()._htmlComponent;
+        }
         this._tagName = tagName;
         this._attributeContext = attributeContext;
         this._selector = attributeContext.getDataSet("data-target");
@@ -149,10 +154,10 @@ export class HtmlComponent implements Flare.Core.Abstraction.IHtmlComponent {
     mount(): void {
         if (this._targetHtmlElement) {
             this._targetHtmlElement.replaceWith(this._htmlElement);
-            for (let child of this._children) {
-                if (child instanceof HtmlComponent) {
-                    child.mount();
-                }
+        }
+        for (let child of this._children) {
+            if (child instanceof HtmlComponent) {
+                child.mount();
             }
         }
     }
